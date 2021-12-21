@@ -18,6 +18,9 @@ import cmath as cmth
 #se haga el proceso como con los demás, muestra operación seno y coseno y hace graficas.
 
 nMuestras=1024
+nFuncion=2#Hay dos funciones activas, seno y coseno
+A=0
+B=0
 #Funciones de entrada
 def inInt(message,messageError):#Valida entrada de un entero
 	correcto=False
@@ -40,36 +43,183 @@ def inFloat(message,messageError):#Valida la entrada de un flotante
 def inMenu():#Muestra y valida las opciones del menu, devolviendo la opcion válida seleccionada
 	correcto=False
 	while correcto==False:
-		'''El menú tiene:
-		A) Cambiar el número de muestras 2^N (por defecto es 1024) = 2^10 con valor máximos de 12
-		B) Mostrar la gráfica de la transformada rápida de Fourier (SEN)
-		C) Mostrar la gráfica de la transformada rápida de Fourier (COS)
-		D) Mostrar la gráfica de la transformada rápida de Fourier (ABS)
-		'''
+		pMessage=""
+		if nFuncion==1:
+			pMessage="A * SEN(B*x)"
+		else:
+			pMessage="A * COS(B*x)"
 		os.system("cls")
-		message="\n---Menú---\nSelecciona una opción:\n"
-		message=message+f"A) Cambiar el número de muestras 2^N (por defecto es {nMuestras}) = 2^10 con valor máximo de 12\n"
-		message=message+"B) Mostrar la gráfica de la FFT del módulo\n"
-		message=message+"C) C\n"
-		message=message+"D) D\n"
-		message=message+"E) E\n"
-		message=message+"F) F\n"
-		message=message+"G) G\n"
+		message=f"\n\n\n\n\n\n\n\n\n---Menú---\nFunción actual: {pMessage}\nA={A}; B={B}; Muestras={nMuestras}\n\nSelecciona una opción:\n\n\n"
+		message=message+"A) Gráfica de Seno\n"
+		message=message+"B) Gráfica de Coseno\n"
+		message=message+"Y) Cambiar el número de muestras 2^N (con valor máximo de 12) y el valor de A y B\n"
+		message=message+"Z) Seleccionar una función distinta\n"
 		message=message+"S) Salir\n"
 		opc=input(message).upper()#Pasamos a mayúsculas
-		if(opc=="A" or opc=="B" or opc=="C" or opc=="D" or opc=="E" or opc=="F" or opc=="G" or opc=="S"):
+		if(opc=="A" or opc=="B" or opc=="Y" or opc=="Z" or opc=="S"):
 			correcto=True
 	if correcto==True:
 		return opc
 def inMuestras():#Solicita el número de muestras potencia de 2
 	correcto=False
 	while correcto==False:
-		vMuestras=inInt("Ingresael valor de N (para 2^N): ","Solo puedes ingresar valores enteros")
+		vMuestras=inInt("Ingresa el valor de N (para 2^N): ","Solo puedes ingresar valores enteros")
 		if(vMuestras<=12 and vMuestras>=1):
 			correcto=True
 		else:
 			print("Solo puedes ingresar valores de 1 a 12")
 	return vMuestras
+def soutFFT2():#Gráfica Coseno
+	#Fase 1: Impresiones e inicializaciones
+	print("\nFunción f(x)=A * cos(Bx)\n")
+	print(f"\nDonde f(x)={A} * cos({B}x)\n")
+	inList=[]#Valores de entrada
+	x=[]#Valores de la función trigonométrica
+	aux=0
+	#Llenamos el vector con las muestras N veces (con el valor de nMuestras)
+	for i in range(nMuestras):#Inicializando listas
+		inList.append(aux)
+		aux+=1
+	#
+	#
+	#Fase 2: Ahora pasamos a la parte de los cálculos
+	#
+	#Cálculos A) Para la gráfica trigonométrica sencilla de las muestras
+	aux=0
+	for i in range(nMuestras):
+		x.append(A*mt.cos(B*inList[aux]))
+		aux+=1
+	#
+	#Cálculo B) Para el módulo (Valor absoluto de la suma de real e imaginaria) e incluye las partes separadas Real e Imaginaria
+	xKList=[]#Lista de la gráfica de la suma del valor real con el imaginario (magnitud). En valor absoluto al ser una magnitud
+	rList=[]#Lista de valores reales
+	iList=[]#Lista de valores imaginarios
+	k=0
+	while k<nMuestras:
+		n=0#Cada que termina con una k, reiniciamos n=0
+		#Sumamos cada término en parte real e imaginaria con sus valores absolutos:
+		real=0
+		imaginaria=0
+		while n<nMuestras:
+			aux=0#Almacena el valor del cálculo
+			#Calculamos para cada n el valor real e imaginario
+			aux=(A*mt.cos(B*n))*(k*n*2*3.14159265)/nMuestras
+			real+=(A*mt.cos(B*n))*mt.cos(aux)*inList[n]
+			imaginaria+=(A*mt.cos(B*n))*mt.sin(aux)*inList[n]
+			#Redondeo
+			imaginaria=round(imaginaria,5)
+			real=round(real,5)
+			n+=1
+		#Pasamos a cada vector los valores
+		rList.append(real)
+		iList.append(imaginaria)
+			#Pasando al vector de la magnitud
+		absR=0
+		absI=0
+		if(rList[k]<0):
+			absR-=rList[k]
+		else:
+			absR+=rList[k]
+		if(iList[k]<0):
+			absI-=iList[k]
+		else:
+			absI+=iList[k]
+		aux=absR+absI
+		if(k==0 or k==nMuestras-1):
+			xKList.append(0)
+		else:
+			xKList.append(aux)
+		k+=1
+	n=0
+	#Arreglos a la primera y ultima posición (prueba) print(f"Klist:{len(xKList)} y x:{len(x)}")
+	#
+	#Fase 3: Gráficas
+	#
+	#Gráfica A) de la función trigonométrica
+	plt.plot(inList,x,'c^',label=f"Muestras del Coseno")
+	plt.legend(loc=9)
+	plt.title(f"Gráfica A*cos(Bx)")
+	plt.ylabel(f"{A}*cos({B}*x)")
+	plt.xlabel("x")
+	plt.show()
+	#
+	#Gráfica B) De la parte Real
+	#
+	plt.plot(inList,rList,'co',label="Parte real")
+	plt.legend(loc=9)
+	plt.title(f"Gráfica A*cos(Bx)")
+	plt.ylabel(f"{A}*cos({B}*x)")
+	plt.xlabel("x")
+	plt.show()
+	#
+	#Gráfica C) De la parte Imaginaria
+	#
+	plt.plot(inList,iList,'co',label="Módulo de F(k)")
+	plt.legend(loc=9)
+	plt.title(f"Gráfica A*cos(Bx)")
+	plt.ylabel(f"{A}*cos({B}*x)")
+	plt.xlabel("x")
+	plt.show()
+	#
+	#Gráfica D) Del módulo
+	#
+	plt.plot(inList,xKList,'c^',label="Módulo de F(k)")
+	plt.legend(loc=9)
+	plt.title(f"Gráfica A*cos(Bx). Magnitud")
+	plt.ylabel(f"|F(k)|")
+	plt.xlabel("k")
+	plt.show()
+
+
+#"Ejecución"
+	#Variables
+potN=10#Para las 1024 muestras
+dos=2
+#Ciclo
+while dos==2: 
+	opc=inMenu()
+	if opc=="A":
+		soutFFT2()
+	else:
+		if opc=="B":
+			soutFFT2()
+		else:
+			if opc=="Y":
+				aux=inInt("Ingresa el valor de N donde 2^N es el número de muestras (de 1 a 12): ","Error, valor no entero")
+				while aux<1 or aux>12:
+					aux=inInt("Error. Debes ingresar un valor de 1 a 12: ","Error, valor no entero")
+				nMuestras=pow(2,aux)
+				#Leemos A y B
+				A=inFloat("Ingresa el valor de A: ","Debes ingresar un valor flotante")
+				B=inFloat("Ingresa el valor de B: ","Debes ingresar un valor flotante")
+				#Imprimimos lo cambiado
+				print(f"Numero de muestras actual: {nMuestras}\nValor de A: {A}\nValor de B: {B}\n")
+			else:
+				if opc=="Z":
+					nFuncion=inInt("Selecciona: \n1) Función Seno\n2) Función Coseno \n","Debes ingresar un valor numérico")
+					while nFuncion!=1 and nFuncion!=2:
+						print("Error. Debes seleccionar una opción válida\n\n")
+						nFuncion=inInt("Selecciona: \n1) Función Seno\n2) Función Coseno\n","Debes ingresar un valor numérico")
+				else:
+					if opc=="S":
+						print("Saliendo de la aplicación...")
+						dos=2+2
+
+"""
+#Ejecución
+"""
+
+
+
+
+
+
+
+
+
+
+
+'''
 def soutFFT0():#Imprimirá el módulo de la FFT de los valores dados
 	tam = -1
 	while tam<1:
@@ -148,169 +298,4 @@ def soutFFT0():#Imprimirá el módulo de la FFT de los valores dados
 	plt.ylabel("|F(k)|")
 	plt.xlabel("k")
 	plt.show()
-def soutFFT1():#Imprimirá el módulo de la FFT de una señal introducida
-	print("\nFunción f(x)=A cos(Bx)\n")
-	inList=[]
-	x=[]
-	aux=0
-	#Llenamos el vector con las muestras N veces (con el valor de nMuestras)
-	for i in range(nMuestras):
-		inList.append(aux)
-		x.append(aux)
-		aux+=1
-	#Ahora pasamos a la parte de los cálculos
-	xKList=[]#Lista de la gráfica de la suma del valor real con el imaginario (magnitud). En valor absoluto al ser una magnitud
-	rList=[]#Lista de valores reales
-	iList=[]#Lista de valores imaginarios
-	k=0
-	while k<nMuestras:
-		n=0#Cada que termina con una k, reiniciamos n=0
-		#Sumamos cada término en parte real e imaginaria con sus valores absolutos:
-		real=0
-		imaginaria=0
-		while n<nMuestras:
-			aux=0#Almacena el valor del cálculo
-			#Calculamos para cada n el valor real e imaginario
-			aux=(k*n*2*3.14159265)/nMuestras
-			real+=mt.cos(aux)*inList[n]
-			imaginaria+=mt.sin(aux)*inList[n]
-			#Redondeo
-			imaginaria=round(imaginaria,5)
-			real=round(real,5)
-			n+=1
-		#Pasamos a cada vector los valores
-		rList.append(real)
-		iList.append(imaginaria)
-			#Pasando al vector de la magnitud
-		absR=0
-		absI=0
-		if(rList[k]<0):
-			absR-=rList[k]
-		else:
-			absR+=rList[k]
-		if(iList[k]<0):
-			absI-=iList[k]
-		else:
-			absI+=iList[k]
-		aux=absR+absI
-		if(k==0 or k==nMuestras-1):
-			xKList.append(0)
-		else:
-			xKList.append(aux)
-		k+=1
-	n=0
-	#Arreglos a la primera y ultima posición
-	print(f"Klist:{len(xKList)} y x:{len(x)}")
-
-	
-	#Gráfica de la entrada
-	plt.plot(x,inList,'ro',label="Señal de entrada F[m]")
-	plt.legend(loc=9)
-	plt.title("Señal F[m]")
-	plt.ylabel("F[m]")
-	plt.xlabel("m")
-	plt.show()
-	#Gráfica 1, del módulo o magnitud
-	plt.plot(x,xKList,'c^',label="Módulo de F(k)")
-	plt.legend(loc=9)
-	plt.title("Magnitud FFT")
-	plt.ylabel("|F(k)|")
-	plt.xlabel("k")
-	plt.show()
-def soutFFT2():#Imprimirá el módulo de la FFT de los 1024 valores
-	print("\nFunción f(x)=A cos(Bx)\n")
-	inList=[]
-	x=[]
-	aux=0
-	#Llenamos el vector con las muestras N veces (con el valor de nMuestras)
-	for i in range(nMuestras):
-		inList.append(aux)
-		aux+=1
-	#Leemos los argumentos A y B
-	A=0
-	B=0
-	A=inFloat("Ingresa el valor de A: ","Debes ingresar un valor flotante")
-	B=inFloat("Ingresa el valor de B: ","Debes ingresar un valor flotante")
-	#Ahora pasamos a la parte de los cálculos, primero mostrando la gráfica con las muestras
-	aux=0
-	for i in range(nMuestras):
-		x.append(A*mt.cos(B*inList[aux]))
-		aux+=1
-	#Funcion de gráficas
-	#Gráfica 2 de Coseno
-	plt.plot(inList,x,'co',label="Muestras del Coseno")
-	plt.legend(loc=9)
-	plt.title(f"Coseno")
-	plt.ylabel("{A}*cos({B}*x)")
-	plt.xlabel("x")
-	plt.show()
-	#EODef
-def soutFFT3():#Imprimirá el módulo de la FFT de los 1024 valores
-	print("\nFunción f(x)=A cos(Bx)\n")
-	inList=[]
-	x=[]
-	aux=0
-	#Llenamos el vector con las muestras N veces (con el valor de nMuestras)
-	for i in range(nMuestras):
-		inList.append(aux)
-		aux+=1
-	#Leemos los argumentos A y B
-	A=0
-	B=0
-	A=inFloat("Ingresa el valor de A: ","Debes ingresar un valor flotante")
-	B=inFloat("Ingresa el valor de B: ","Debes ingresar un valor flotante")
-	#Ahora pasamos a la parte de los cálculos, primero mostrando la gráfica con las muestras
-	aux=0
-	for i in range(nMuestras):
-		x.append(A*mt.cos(B*inList[aux]))
-		aux+=1
-	#Funcion de gráficas
-	#Gráfica 2 de Coseno
-	plt.plot(inList,x,'co',label="Muestras del Coseno")
-	plt.legend(loc=9)
-	plt.title(f"Coseno")
-	plt.ylabel("{A}*cos({B}*x)")
-	plt.xlabel("x")
-	plt.show()
-	#EODef
-
-
-#"Ejecución"
-	#Variables
-potN=10#Para las 1024 muestras
-dos=2
-#Ciclo
-while dos==2: 
-	opc=inMenu()
-	if opc=="A":
-		aux=inInt("Ingresa el valor de N donde 2^N es el número de muestras (de 1 a 12): ","Error, valor no entero")
-		while aux<1 or aux>12:
-			aux=inInt("Error. Debes ingresar un valor de 1 a 12: ","Error, valor no entero")
-		nMuestras=pow(2,aux)
-		print(f"Numero de muestras actual: {nMuestras}")
-	else:
-		if opc=="B":
-			soutFFT1()
-		else:
-			if opc=="C":
-				soutFFT2()
-			else: 
-				if opc=="D":
-					soutFFT3()
-				else: 
-					if opc=="E":
-						soutFFT4()
-					else:
-						if opc=="F":
-							soutFFT5()
-						else:
-							if opc=="G":
-								soutFFT6()
-							else:
-								if opc=="S":
-									print("Saliendo de la aplicación")
-									dos=2+2
-
-"""
-#Ejecución
-"""
+'''
