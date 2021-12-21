@@ -17,10 +17,11 @@ import cmath as cmth
 #O5: De ese archivo .txt se deben tomar los valores e ingresarlos al programa para que se resuelvan y 
 #se haga el proceso como con los demás, muestra operación seno y coseno y hace graficas.
 
-nMuestras=1024
+nMuestras=0
 nFuncion=2#Hay dos funciones activas, seno y coseno
 A=0
 B=0
+inList=[]#Valores de entrada
 #Funciones de entrada
 def inInt(message,messageError):#Valida entrada de un entero
 	correcto=False
@@ -52,7 +53,7 @@ def inMenu():#Muestra y valida las opciones del menu, devolviendo la opcion vál
 		message=f"\n\n\n\n\n\n\n\n\n---Menú---\nFunción actual: {pMessage}\nA={A}; B={B}; Muestras={nMuestras}\n\nSelecciona una opción:\n\n\n"
 		message=message+"A) Gráfica de Seno\n"
 		message=message+"B) Gráfica de Coseno\n"
-		message=message+"Y) Cambiar el número de muestras 2^N (con valor máximo de 12) y el valor de A y B\n"
+		message=message+"Y) Actualiza las muestras del .txt y cambia el valor de A y B\n"
 		message=message+"Z) Seleccionar una función distinta\n"
 		message=message+"S) Salir\n"
 		opc=input(message).upper()#Pasamos a mayúsculas
@@ -73,19 +74,13 @@ def soutFFT2():#Gráfica Coseno
 	#Fase 1: Impresiones e inicializaciones
 	print("\nFunción f(x)=A * cos(Bx)\n")
 	print(f"\nDonde f(x)={A} * cos({B}x)\n")
-	inList=[]#Valores de entrada
 	x=[]#Valores de la función trigonométrica
 	aux=0
-	#Llenamos el vector con las muestras N veces (con el valor de nMuestras)
-	for i in range(nMuestras):#Inicializando listas
-		inList.append(aux)
-		aux+=1
 	#
 	#
 	#Fase 2: Ahora pasamos a la parte de los cálculos
 	#
 	#Cálculos A) Para la gráfica trigonométrica sencilla de las muestras
-	aux=0
 	for i in range(nMuestras):
 		x.append(A*mt.cos(B*inList[aux]))
 		aux+=1
@@ -103,9 +98,9 @@ def soutFFT2():#Gráfica Coseno
 		while n<nMuestras:
 			aux=0#Almacena el valor del cálculo
 			#Calculamos para cada n el valor real e imaginario
-			aux=(A*mt.cos(B*n))*(k*n*2*3.14159265)/nMuestras
-			real+=(A*mt.cos(B*n))*mt.cos(aux)*inList[n]
-			imaginaria+=(A*mt.cos(B*n))*mt.sin(aux)*inList[n]
+			aux=((A*mt.cos(B*k*n))*2*3.14159265)/nMuestras
+			real+=mt.cos(aux)*inList[n]
+			imaginaria+=mt.sin(aux)*inList[n]
 			#Redondeo
 			imaginaria=round(imaginaria,5)
 			real=round(real,5)
@@ -154,7 +149,7 @@ def soutFFT2():#Gráfica Coseno
 	#
 	#Gráfica C) De la parte Imaginaria
 	#
-	plt.plot(inList,iList,'co',label="Módulo de F(k)")
+	plt.plot(inList,iList,'co',label="Parte Imaginaria")
 	plt.legend(loc=9)
 	plt.title(f"Gráfica A*cos(Bx)")
 	plt.ylabel(f"{A}*cos({B}*x)")
@@ -170,11 +165,28 @@ def soutFFT2():#Gráfica Coseno
 	plt.xlabel("k")
 	plt.show()
 
-
 #"Ejecución"
 	#Variables
 potN=10#Para las 1024 muestras
 dos=2
+#
+#Inicializar la lista de valores
+inList=[]
+contador=1#Contador de valores del archivo
+aux=""
+with open("lista.txt") as archivo:
+	for linea in archivo:
+		for i in range(0, len(linea)):
+			if linea[i] != " ":
+				aux+=linea[i]
+			else:
+				contador+=1
+				inList.append(int(aux))
+				aux=""
+#Guardamos el último valor en inList
+inList.append(int(aux))
+nMuestras=len(inList)
+#
 #Ciclo
 while dos==2: 
 	opc=inMenu()
@@ -185,10 +197,25 @@ while dos==2:
 			soutFFT2()
 		else:
 			if opc=="Y":
-				aux=inInt("Ingresa el valor de N donde 2^N es el número de muestras (de 1 a 12): ","Error, valor no entero")
-				while aux<1 or aux>12:
-					aux=inInt("Error. Debes ingresar un valor de 1 a 12: ","Error, valor no entero")
-				nMuestras=pow(2,aux)
+				#aux=inInt("Ingresa el valor de N donde 2^N es el número de muestras (de 1 a 12): ","Error, valor no entero")
+				#while aux<1 or aux>12:
+					#aux=inInt("Error. Debes ingresar un valor de 1 a 12: ","Error, valor no entero")
+				#nMuestras=pow(2,aux)
+				#Obtenemos el archivo de texto.
+				inList=[]
+				contador=1#Contador de valores del archivo
+				aux=""
+				with open("lista.txt") as archivo:
+					for linea in archivo:
+						for i in range(0, len(linea)):
+							if linea[i] != " ":
+								aux+=linea[i]
+							else:
+								contador+=1
+								inList.append(int(aux))
+								aux=""
+				#Guardamos el último valor en inList
+				inList.append(int(aux))
 				#Leemos A y B
 				A=inFloat("Ingresa el valor de A: ","Debes ingresar un valor flotante")
 				B=inFloat("Ingresa el valor de B: ","Debes ingresar un valor flotante")
