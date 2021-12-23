@@ -172,8 +172,8 @@ def soutFFT1():#Gráfica Seno
 			#Gráfica A) de la función trigonométrica
 			plt.plot(counter,x,'c^',label=f"Muestras del Seno")
 			plt.legend(loc=9)
-			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*cos({B}*x)")
+			plt.title(f"Gráfica A*sen(Bx)")
+			plt.ylabel(f"{A}*sen({B}*x)")
 			plt.xlabel("x")
 		if i==2:
 			#Gráfica B) De la parte Real
@@ -233,21 +233,21 @@ def soutFFT2():#Gráfica Coseno
 			plt.plot(counter,x,'c^',label=f"Muestras del Coseno")
 			plt.legend(loc=9)
 			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*sen({B}*x)")
+			plt.ylabel(f"{A}*cos({B}*x)")
 			plt.xlabel("x")
 		if i==2:
 			#Gráfica B) De la parte Real
 			plt.plot(counter,rList,'co',label="Parte real")
 			plt.legend(loc=9)
 			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*sen({B}*x)")
+			plt.ylabel(f"{A}*cos({B}*x)")
 			plt.xlabel("x")
 		if i==3:
 			#Gráfica C) De la parte Imaginaria
 			plt.plot(counter,iList,'co',label="Parte Imaginaria")
 			plt.legend(loc=9)
 			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*sen({B}*x)")
+			plt.ylabel(f"{A}*cos({B}*x)")
 			plt.xlabel("x")
 	fig.tight_layout()
 	plt.show()
@@ -305,8 +305,11 @@ def soutFFTMod():#Gráfica Módulo (segun OPC seno o coseno)
 		if i==2:
 			#Gráfica B) De la parte Real
 			plt.plot(counter,xKList,'c^',label="Módulo de F(k)")
-			plt.legend(loc=9)	
-			plt.title(f"Gráfica A*sen(Bx). Magnitud")
+			plt.legend(loc=9)
+			if(nFuncion==1):
+				plt.title(f"Gráfica A*sen(Bx). Magnitud")
+			else:
+				plt.title(f"Gráfica A*cos(Bx). Magnitud")
 			plt.ylabel(f"|F(k)|")
 			plt.xlabel("k")
 	fig.tight_layout()
