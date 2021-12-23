@@ -2,7 +2,6 @@ import os#Limpiar pantalla
 import matplotlib.pyplot as plt
 import numpy as np
 import math as mt
-import cmath as cmth
 
 #Objetivo: Realizar un programa que realice la transformada rápida discreta de Fourier
 
