@@ -1,5 +1,6 @@
 import os#Limpiar pantalla
 import matplotlib.pyplot as plt
+import numpy as np
 import math as mt
 import cmath as cmth
 
@@ -61,42 +62,6 @@ def inMenu():#Muestra y valida las opciones del menu, devolviendo la opcion vál
 			correcto=True
 	if correcto==True:
 		return opc
-def inMuestras():#Solicita el número de muestras potencia de 2
-	correcto=False
-	while correcto==False:
-		vMuestras=inInt("Ingresa el valor de N (para 2^N): ","Solo puedes ingresar valores enteros")
-		if(vMuestras<=12 and vMuestras>=1):
-			correcto=True
-		else:
-			print("Solo puedes ingresar valores de 1 a 12")
-	return vMuestras
-def realFT(y,n,isign):
-		n2=n+2;wi=0.0;wr=1.0;
-		theta=3.14159265358979/n
-		wtemp=mt.sin(0.5*theta)
-		wpr = -2.0*wtemp*wtemp
-		wpi=mt.sin(theta)
-		y[1]=0.0;
-		j=2
-		while j<=((n>>1)+1):
-			wr=(wtemp)*wpr-wi*wpi+wr;
-			wi=wi*wpr+wtemp*wpi+wi;
-			y1=wi*(y[j]+y[n2-j]);
-			y2=0.5*(y[j]-y[n2-j]);
-			y[j]=y1+y2;
-			y[n2-j]=y1-y2;		
-			j+=1
-		realFT(y,n,1)
-		y[1]*=0.5;
-		suma=y[2]=0.0;
-		j=1
-		while j<=(n-1):
-			suma += y[j];
-			y[j]=y[j+1];
-			y[j+1]=suma;
-			j+=2
-def sinFT(y,n):
-	realFT(y,n,1)
 def soutFFT0():#Imprimirá el módulo de la FFT de los valores dados
 	xKList=[]#Lista de la gráfica de la suma del valor real con el imaginario (magnitud). En valor absoluto al ser una magnitud
 	rList=[]#Lista de valores reales
@@ -180,47 +145,15 @@ def soutFFT1():#Gráfica Seno
 	#
 	#Cálculos A) Para la gráfica trigonométrica sencilla de las muestras
 	for i in range(nMuestras):
-		x.append(A*mt.sin(B*inList[aux]))
+		x.append(A*mt.sin(B*inList[aux]))#Es la señal
 		aux+=1
 	#
 	#Cálculo B) Para el módulo (Valor absoluto de la suma de real e imaginaria) e incluye las partes separadas Real e Imaginaria
-	xKList=[]#Lista de la gráfica de la suma del valor real con el imaginario (magnitud). En valor absoluto al ser una magnitud
 	rList=[]#Lista de valores reales
 	iList=[]#Lista de valores imaginarios
-	k=0
-	while k<nMuestras:
-		n=0#Cada que termina con una k, reiniciamos n=0
-		#Sumamos cada término en parte real e imaginaria con sus valores absolutos:
-		real=0
-		imaginaria=0
-		while n<nMuestras:
-			aux=0#Almacena el valor del cálculo
-			#Calculamos para cada n el valor real e imaginario
-			aux=(k*(A*mt.sin(B*n))*2*3.14159265)/nMuestras
-			real+=A*mt.cos(B*aux)*inList[n]
-			imaginaria-=A*mt.sin(B*aux)*inList[n]
-			#Redondeo
-			imaginaria=round(imaginaria,5)
-			real=round(real,5)
-			n+=1
-		#Pasamos a cada vector los valores
-		rList.append(real)
-		iList.append(imaginaria)
-			#Pasando al vector de la magnitud
-		absR=0
-		absI=0
-		if(rList[k]<0):
-			absR-=rList[k]
-		else:
-			absR+=rList[k]
-		if(iList[k]<0):
-			absI-=iList[k]
-		else:
-			absI+=iList[k]
-		aux=absR+absI
-		xKList.append(aux)
-		k+=1
-	n=0
+	rList = np.real(np.fft.fft(x))
+	iList = np.imag(np.fft.fft(x))
+    #LLenar contador
 	aux=0
 	for i in range(len(inList)):
 		counter.append(aux)
@@ -239,8 +172,8 @@ def soutFFT1():#Gráfica Seno
 			#Gráfica A) de la función trigonométrica
 			plt.plot(counter,x,'c^',label=f"Muestras del Seno")
 			plt.legend(loc=9)
-			plt.title(f"Gráfica A*sen(Bx)")
-			plt.ylabel(f"{A}*sen({B}*x)")
+			plt.title(f"Gráfica A*cos(Bx)")
+			plt.ylabel(f"{A}*cos({B}*x)")
 			plt.xlabel("x")
 		if i==2:
 			#Gráfica B) De la parte Real
@@ -264,7 +197,7 @@ def soutFFT2():#Gráfica Coseno
 	print("\nFunción f(x)=A * cos(Bx)\n")
 	print(f"\nDonde f(x)={A} * cos({B}x)\n")
 	x=[]#Valores de la función trigonométrica
-	counter=[]
+	counter=[]#Valores para X
 	aux=0
 	#
 	#
@@ -272,47 +205,15 @@ def soutFFT2():#Gráfica Coseno
 	#
 	#Cálculos A) Para la gráfica trigonométrica sencilla de las muestras
 	for i in range(nMuestras):
-		x.append(A*mt.cos(B*inList[aux]))
+		x.append(A*mt.cos(B*inList[aux]))#Es la señal
 		aux+=1
 	#
 	#Cálculo B) Para el módulo (Valor absoluto de la suma de real e imaginaria) e incluye las partes separadas Real e Imaginaria
-	xKList=[]#Lista de la gráfica de la suma del valor real con el imaginario (magnitud). En valor absoluto al ser una magnitud
 	rList=[]#Lista de valores reales
 	iList=[]#Lista de valores imaginarios
-	k=0
-	while k<nMuestras:
-		n=0#Cada que termina con una k, reiniciamos n=0
-		#Sumamos cada término en parte real e imaginaria con sus valores absolutos:
-		real=0
-		imaginaria=0
-		while n<nMuestras:
-			aux=0#Almacena el valor del cálculo
-			#Calculamos para cada n el valor real e imaginario
-			aux=(k*n*2*3.14159265)/nMuestras
-			real+=mt.cos(aux)*inList[n]
-			imaginaria-=mt.sin(aux)*inList[n]
-			#Redondeo
-			imaginaria=round(imaginaria,5)
-			real=round(real,5)
-			n+=1
-		#Pasamos a cada vector los valores
-		rList.append(real)
-		iList.append(imaginaria)
-			#Pasando al vector de la magnitud
-		absR=0
-		absI=0
-		if(rList[k]<0):
-			absR-=rList[k]
-		else:
-			absR+=rList[k]
-		if(iList[k]<0):
-			absI-=iList[k]
-		else:
-			absI+=iList[k]
-		aux=absR+absI
-		xKList.append(aux)
-		k+=1
-	n=0
+	rList = np.real(np.fft.fft(x))
+	iList = np.imag(np.fft.fft(x))
+    #LLenar contador
 	aux=0
 	for i in range(len(inList)):
 		counter.append(aux)
@@ -332,21 +233,21 @@ def soutFFT2():#Gráfica Coseno
 			plt.plot(counter,x,'c^',label=f"Muestras del Coseno")
 			plt.legend(loc=9)
 			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*cos({B}*x)")
+			plt.ylabel(f"{A}*sen({B}*x)")
 			plt.xlabel("x")
 		if i==2:
 			#Gráfica B) De la parte Real
 			plt.plot(counter,rList,'co',label="Parte real")
 			plt.legend(loc=9)
 			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*cos({B}*x)")
+			plt.ylabel(f"{A}*sen({B}*x)")
 			plt.xlabel("x")
 		if i==3:
 			#Gráfica C) De la parte Imaginaria
 			plt.plot(counter,iList,'co',label="Parte Imaginaria")
 			plt.legend(loc=9)
 			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*cos({B}*x)")
+			plt.ylabel(f"{A}*sen({B}*x)")
 			plt.xlabel("x")
 	fig.tight_layout()
 	plt.show()
@@ -363,56 +264,18 @@ def soutFFTMod():#Gráfica Módulo (segun OPC seno o coseno)
 	x=[]#Valores de la función trigonométrica
 	counter=[]
 	aux=0
-	#
-	#
-	#Fase 2: Ahora pasamos a la parte de los cálculos
-	#
-	#Cálculos A) Para la gráfica trigonométrica sencilla de las muestras
-	for i in range(nMuestras):
-		x.append(A*mt.sin(B*inList[aux]))
-		aux+=1
+	if(nFuncion==1):
+		for i in range(nMuestras):
+			x.append(A*mt.sin(B*inList[aux]))
+			aux+=1
+	else:
+		for i in range(nMuestras):
+			x.append(A*mt.cos(B*inList[aux]))
+			aux+=1
 	#
 	#Cálculo B) Para el módulo (Valor absoluto de la suma de real e imaginaria) e incluye las partes separadas Real e Imaginaria
 	xKList=[]#Lista de la gráfica de la suma del valor real con el imaginario (magnitud). En valor absoluto al ser una magnitud
-	rList=[]#Lista de valores reales
-	iList=[]#Lista de valores imaginarios
-	k=0
-	while k<nMuestras:
-		n=0#Cada que termina con una k, reiniciamos n=0
-		#Sumamos cada término en parte real e imaginaria con sus valores absolutos:
-		real=0
-		imaginaria=0
-		while n<nMuestras:
-			aux=0#Almacena el valor del cálculo
-			#Calculamos para cada n el valor real e imaginario
-			if(nFuncion==1):
-				aux=(k*(A*mt.sin(B*n))*2*3.14159265)/nMuestras
-			else:
-				aux=(k*(A*mt.cos(B*n))*2*3.14159265)/nMuestras
-			real+=A*mt.cos(B*aux)*inList[n]
-			imaginaria-=A*mt.sin(B*aux)*inList[n]
-			#Redondeo
-			imaginaria=round(imaginaria,5)
-			real=round(real,5)
-			n+=1
-		#Pasamos a cada vector los valores
-		rList.append(real)
-		iList.append(imaginaria)
-			#Pasando al vector de la magnitud
-		absR=0
-		absI=0
-		if(rList[k]<0):
-			absR-=rList[k]
-		else:
-			absR+=rList[k]
-		if(iList[k]<0):
-			absI-=iList[k]
-		else:
-			absI+=iList[k]
-		aux=absR+absI
-		xKList.append(aux)
-		k+=1
-	n=0
+	xKList = np.abs(np.fft.fft(x))
 	aux=0
 	for i in range(len(inList)):
 		counter.append(aux)
@@ -421,10 +284,10 @@ def soutFFTMod():#Gráfica Módulo (segun OPC seno o coseno)
 	#
 	#Fase 3: Gráficas
 	#
-	fig,axes=plt.subplots(3,1)
-	#Número de gráfhhicas
-	for i in range(1,4):#3 gráficas
-		ax=plt.subplot(3,1,i)
+	fig,axes=plt.subplots(2,1)
+	#Número de gráficas
+	for i in range(1,3):#2 gráficas
+		ax=plt.subplot(2,1,i)
 		#Estilos
 		ax.set_facecolor("powderblue")
 		if i==1:
@@ -446,18 +309,10 @@ def soutFFTMod():#Gráfica Módulo (segun OPC seno o coseno)
 			plt.title(f"Gráfica A*sen(Bx). Magnitud")
 			plt.ylabel(f"|F(k)|")
 			plt.xlabel("k")
-		if i==3:
-			#Gráfica C) De la parte Imaginaria
-			plt.plot(counter,iList,'co',label="Parte Imaginaria")
-			plt.legend(loc=9)
-			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*cos({B}*x)")
-			plt.xlabel("x")
 	fig.tight_layout()
 	plt.show()
 #"Ejecución"
 	#Variables
-potN=10#Para las 1024 muestras
 dos=2
 #
 #Inicializar la lista de valores
@@ -477,6 +332,7 @@ with open("lista.txt") as archivo:
 inList.append(float(aux))
 nMuestras=len(inList)
 #Leemos A y B
+print("\n->Bienvenid@ a la app. Función f(x)=A * cos(Bx)<-\n\n")
 A=inFloat("Ingresa el valor de A: ","Debes ingresar un valor flotante")
 B=inFloat("Ingresa el valor de B: ","Debes ingresar un valor flotante")
 #Imprimimos lo cambiado
@@ -487,9 +343,9 @@ while dos==2:
 	opc=inMenu()
 	if opc=="A":
 		if nFuncion==1:
-			soutFFT1()
+			soutFFT1()#Seno
 		else:
-			soutFFT2()
+			soutFFT2()#Coseno
 	else:
 		if opc=="B":
 			soutFFTMod()
@@ -520,6 +376,7 @@ while dos==2:
 					#Leemos A y B
 					A=inFloat("Ingresa el valor de A: ","Debes ingresar un valor flotante")
 					B=inFloat("Ingresa el valor de B: ","Debes ingresar un valor flotante")
+					nMuestras=len(inList)
 					#Imprimimos lo cambiado
 					print(f"Numero de muestras actual: {nMuestras}\nValor de A: {A}\nValor de B: {B}\n")
 				else:
@@ -532,93 +389,3 @@ while dos==2:
 						if opc=="S":
 							print("Saliendo de la aplicación...")
 							dos=2+2
-
-
-'''
-def soutFFT2():#Gráfica Coseno
-	#Fase 1: Impresiones e inicializaciones
-	print("\nFunción f(x)=A * cos(Bx)\n")
-	print(f"\nDonde f(x)={A} * cos({B}x)\n")
-	x=[]#Valores de la función trigonométrica
-	aux=0
-	#
-	#
-	#Fase 2: Ahora pasamos a la parte de los cálculos
-	#
-	#Cálculos A) Para la gráfica trigonométrica sencilla de las muestras
-	for i in range(nMuestras):
-		x.append(A*mt.cos(B*inList[aux]))
-		aux+=1
-	#
-	#Cálculo B) Para el módulo (Valor absoluto de la suma de real e imaginaria) e incluye las partes separadas Real e Imaginaria
-	xKList=[]#Lista de la gráfica de la suma del valor real con el imaginario (magnitud). En valor absoluto al ser una magnitud
-	rList=[]#Lista de valores reales
-	iList=[]#Lista de valores imaginarios
-	k=0
-	while k<nMuestras:
-		n=0#Cada que termina con una k, reiniciamos n=0
-		#Sumamos cada término en parte real e imaginaria con sus valores absolutos:
-		real=0
-		imaginaria=0
-		while n<nMuestras:
-			aux=0#Almacena el valor del cálculo
-			#Calculamos para cada n el valor real e imaginario
-			aux=(k*n*2*3.14159265)/nMuestras
-			real+=mt.cos(aux)*inList[n]
-			imaginaria+=mt.sin(aux)*inList[n]
-			#Redondeo
-			imaginaria=round(imaginaria,5)
-			real=round(real,5)
-			n+=1
-		#Pasamos a cada vector los valores
-		rList.append(real)
-		iList.append(imaginaria)
-			#Pasando al vector de la magnitud
-		absR=0
-		absI=0
-		if(rList[k]<0):
-			absR-=rList[k]
-		else:
-			absR+=rList[k]
-		if(iList[k]<0):
-			absI-=iList[k]
-		else:
-			absI+=iList[k]
-		aux=absR+absI
-		xKList.append(aux)
-		k+=1
-	n=0
-	#Arreglos a la primera y ultima posición (prueba) print(f"Klist:{len(xKList)} y x:{len(x)}")
-	#
-	#Fase 3: Gráficas
-	#
-	fig,axes=plt.subplots(3,1)
-	#Número de gráfhhicas
-	for i in range(1,4):#3 gráficas
-		ax=plt.subplot(3,1,i)
-		#Estilos
-		ax.set_facecolor("powderblue")
-		if i==1:
-			#Gráfica A) de la función trigonométrica
-			plt.plot(inList,x,'c^',label=f"Muestras del Coseno")
-			plt.legend(loc=9)
-			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*cos({B}*x)")
-			plt.xlabel("x")
-		if i==2:
-			#Gráfica B) De la parte Real
-			plt.plot(inList,rList,'co',label="Parte real")
-			plt.legend(loc=9)
-			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*cos({B}*x)")
-			plt.xlabel("x")
-		if i==3:
-			#Gráfica C) De la parte Imaginaria
-			plt.plot(inList,iList,'co',label="Parte Imaginaria")
-			plt.legend(loc=9)
-			plt.title(f"Gráfica A*cos(Bx)")
-			plt.ylabel(f"{A}*cos({B}*x)")
-			plt.xlabel("x")
-	fig.tight_layout()
-	plt.show()
-	'''
